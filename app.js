@@ -9,7 +9,7 @@ const pool = new Pool({
     host: 'c3gtj1dt5vh48j.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com',
     port: 5432, // default Postgres port
     database: 'd3me0rd12s6r07'
-  });
+});
 
 // create TODO LIST
 
@@ -20,25 +20,24 @@ const createTableTask = () => {
 }
 
 const insertTaskTodoList = (id, task, employee_id) => {
-    return pool.query('')
+    pool.query('INSERT INTO task (id, task, employee_id) VALUES (?, ?, ?)', [id, task, employee_id]);
 }
-
-//http://localhost:3000/?id=1&task=ทดสอบ&emp_id=001
-
-app.get('/insertTask', (req, res) => {
-    console.log(req.query)
-    getAllTodoList()
-    res.send({'status' : 'success'})
-});
 
 app.get('/createTable', (req, res) => {
     createTableTask()
-    res.send({'status' : 'success'})
+    res.send({ 'status': 'success' })
 })
+
+//http://localhost:3000/insertTaskTodoList?id=1&task=ทดสอบ&emp_id=001
+
+app.get('/insertTaskTodoList', (req, res) => {
+    console.log(req.query)
+    insertTaskTodoList(req.query)
+    res.send({ 'status': 'success' })
+});
 
 
 app.listen(port, () => {
     console.log(`Server listening at port: ${port}`);
 });
-    
-    
+
