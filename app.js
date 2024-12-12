@@ -1,6 +1,11 @@
+const fetch = require("node-fetch");
+
 const express = require('express');
 const app = express();
 const port = 3000;
+
+app.set('views', './');
+app.set("view engine", "ejs");
 
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -22,9 +27,38 @@ const createTaskTable = () => {
     pool.query('CREATE TABLE task (id INT, task VARCHAR(255), emp_id VARCHAR(255))')
 }
 
-const insertTaskTodoList = (id, task, emp_id) => {
+const insertTaskTodoList = ({id, task, emp_id}) => {
     pool.query('INSERT INTO task (id, task, emp_id) VALUES ($1, $2, $3)', [id, task, emp_id]);
 }
+
+const getAllTaskTodoList = async () => {
+    const client = await pool.connect();
+    const result = await pool.query('SELECT * FROM task')
+    client.release();
+    return result.rows;
+}
+
+app.get('/', (req, res) => {
+    //console.log(req.query)
+    res.render("index", {});
+
+});
+
+app.get('/testFetch', (req, res)=> {
+    fetch('https://fake-json-api.mock.beeceptor.com/users')
+    .then(response => response.json())
+    .then(data => res.send(data))
+    .catch(error => console.error('Error:', error))
+})
+
+
+app.get('/getAllTaskTodoList', (req, res) => {
+
+    getAllTaskTodoList().then(result => {
+        return res.send(result)
+    })
+
+})
 
 app.get('/createTable', (req, res) => {
     createTaskTable()
@@ -34,7 +68,7 @@ app.get('/createTable', (req, res) => {
 //http://localhost:3000/insertTaskTodoList?id=1&task=ทดสอบ&emp_id=001
 
 app.get('/insertTaskTodoList', (req, res) => {
-    console.log(req.query)
+    //console.log(req.query)
 
     const id = Number(req.query.id)
     const task = req.query.task
@@ -43,6 +77,8 @@ app.get('/insertTaskTodoList', (req, res) => {
     insertTaskTodoList(id, task, emp_id)
     res.send({ 'status': 'success' })
 });
+
+
 
 
 
